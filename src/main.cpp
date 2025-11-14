@@ -1,19 +1,28 @@
 #include <iostream>
-#include <iomanip>
-#include <chrono>
-#include <thread>
-#include "PIDController.h"
-
-using namespace std;
-
-const float KP = 5.0f;
-const float KI = 0.2f;
-const float KD = 1.0f;
+#include "pid/pid.hpp"
 
 int main() {
-    
-    // Create PID controller
-    PIDController pid(KP, KI, KD, 0.0f, 100.0f);
+    PIDController tempController(1.0, 0.1, 1.0);
+
+    double target = 1;
+    double current = 1;
+
+    for (int i = 0; i < 500; i++) {
+        double thermalEnergy = tempController.step(current, target);
+
+        current += thermalEnergy;
+
+        current = current * 0.99;
+
+        target = target * 1.01;
+
+        double error = current - target;
+
+        std::cout << "Temp = " << current << std::endl;
+        std::cout << "Targ = " << target << std::endl;
+        std::cout << "Err  = " << error << std::endl;
+        std::cout << "Out  = " << thermalEnergy << std::endl;
+    }
 
     return 0;
-} 
+}
