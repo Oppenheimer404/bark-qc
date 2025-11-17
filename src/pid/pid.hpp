@@ -9,7 +9,7 @@ private:
     double outputMin, outputMax;
 public:
     PIDController(double Kp, double Ki, double Kd);
-    double step(double current, double target);
+    double run(double current, double target);
 };
 
 #endif

@@ -1,26 +1,38 @@
 #include "pid.hpp"
 
-PIDController::PIDController(double kp, double ki, double kd)
-: Kp(kp), Ki(ki), Kd(kd), totalError(0.0), lastError(0.0), outputMin(0), outputMax(5) {}
+PIDController::PIDController(
+    double kp, double ki, double kd
+):
+Kp(kp), Ki(ki), Kd(kd),
+totalError(0.0), lastError(0.0),
+outputMin(0), outputMax(100)
+{}
 
-double PIDController::step(double current, double target) {
+double PIDController::run(double current, double target) {
+
+    // * Calculate PID values in full
     double error = target - current;
-    totalError += error;
     double P = Kp * error;
     double I = Ki * totalError;
     double D = Kd * (error - lastError);
-    lastError = error;
-    double output = P + I + D;
+    double outputPID = P + I + D;
 
-    if (output > outputMax) {
-        output = outputMax;
-    } else if (output < outputMin) {
-        output = outputMin;
+    // * Clamp PID output between min and max
+    if (outputPID > outputMax) {
+        outputPID = outputMax;
+    } else if (outputPID < outputMin) {
+        outputPID = outputMin;
     }
 
-    if (!(output >= outputMax || output <= outputMin)) {
+    // * Accumulate error only if outputPID isn't saturated
+    if ( !( ( outputPID > outputMax ) || ( outputPID < outputMin ) ) ) {
         totalError += error;
     }
 
-    return output;
+    // * Save previous error value for derivitive calculation
+    lastError = error;
+
+    // * Convert to percentage value from default ( 0 - 100 )
+    outputPID = ( outputPID / 100 );
+    return outputPID;
 }
